@@ -11,6 +11,24 @@ const MeetupDetails = () => {
   );
 };
 
+export async function getStaticPaths() {
+  return {
+    fallback: false, // show 404 error page if no route found
+    paths: [
+      {
+        params: {
+          meetupId: "m1",
+        },
+      },
+      {
+        params: {
+          meetupId: "m2",
+        },
+      },
+    ],
+  };
+}
+
 export async function getStaticProps(context) {
   // Fetch date from API
 
