@@ -1,50 +1,85 @@
-import MeetupDetail from "../../components/meetups/MeetupDetail";
+/* Meetup Detail Page */
 
-const MeetupDetails = () => {
+import MeetupDetail from "../../components/meetups/MeetupDetail";
+import { MongoClient, ObjectId } from "mongodb";
+
+// Get data fom getStaticProps function with props
+const MeetupDetails = (props) => {
   return (
     <MeetupDetail
-      description="This is a first meetup"
-      address="Some Street 5, Some City"
-      title="First Meetup"
-      image="https://images.unsplash.com/photo-1635361230615-26d866ea9370?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80"
+      description={props.meetupData.description}
+      address={props.meetupData.address}
+      title={props.meetupData.title}
+      image={props.meetupData.image}
     />
   );
 };
 
+/* Generate array of path dynamically */
 export async function getStaticPaths() {
+  /*Get data from mongo database */
+
+  // Connect to mongodb cluster
+  const client = await MongoClient.connect(
+    "mongodb+srv://user:nP0WHombYLsf7ocx@cluster0.ynjjr.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+
+  // Call db method on the client object
+  const db = client.db();
+
+  // Access to collection
+  const meetupCollection = db.collection("meetups");
+
+  // get data from mondo database (get only _id property from all object, first argument {} = all documents)
+  const meetups = await meetupCollection.find({}, { _id: 1 }).toArray();
+
+  // Close database connection
+  client.close();
   return {
     fallback: false, // show 404 error page if no route found
-    paths: [
-      {
-        params: {
-          meetupId: "m1",
-        },
+    paths: meetups.map((meetup) => ({
+      params: {
+        meetupId: meetup._id.toString(),
       },
-      {
-        params: {
-          meetupId: "m2",
-        },
-      },
-    ],
+    })),
   };
 }
 
-export async function getStaticProps(context) {
-  // Fetch date from API
 
+// get data from mongo database before component load, and send data to component with props
+export async function getStaticProps(context) {
   const meetupId = context.params.meetupId;
-  console.log(meetupId);
+
+  /*Get data from mongo database */
+
+  // Connect to mongodb cluster
+  const client = await MongoClient.connect(
+    "mongodb+srv://user:nP0WHombYLsf7ocx@cluster0.ynjjr.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+
+  // Call db method on the client object
+  const db = client.db();
+
+  // Access to collection
+  const meetupCollection = db.collection("meetups");
+
+  // get data (single meetup) from mondo database (get only object, findOne() = one single document)
+  const selectedMeetup = await meetupCollection.findOne({
+    _id: ObjectId(meetupId), // change automatically generated id (mongodb) with meetupId extracted from params (convert it to ObjetId, to communicate with mongodb id)
+  }); 
+
+  // Close database connection
+  client.close();
 
   return {
     props: {
       meetupData: {
-        image:
-          "https://images.unsplash.com/photo-1635361230615-26d866ea9370?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80",
-        id: meetupId,
-        title: "First Meetup",
-        address: "Some Street 5, Some City",
-        description: "This is a first meetup",
-      },
+          id: selectedMeetup._id.toString(),
+          title: selectedMeetup.title,
+          address: selectedMeetup.address,
+          image: selectedMeetup.image,
+          description: selectedMeetup.description
+      }
     },
   };
 }
