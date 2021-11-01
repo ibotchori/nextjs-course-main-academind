@@ -1,9 +1,11 @@
 // our-domain/new-meetup
 import { useRouter } from "next/router";
+import { Fragment } from "react";
 import NewMeetupForm from "../../components/meetups/NewMeetupForm";
+import Head from "next/head";
 
 const NewMeetupPage = () => {
-    const router = useRouter()
+  const router = useRouter();
   // this function receives data from NewMeetupForm component
   async function addMeetupHandler(enteredMeetupData) {
     // Send request on internal API, and NextJS trigger function in the api folder
@@ -19,9 +21,23 @@ const NewMeetupPage = () => {
     console.log(data);
 
     // go to home page after sending request
-    router.push('/')
+    router.push("/");
   }
-  return <NewMeetupForm onAddMeetup={addMeetupHandler} />; // send addMeetupHandler function to NewMeetupForm with props
+  return (
+    <Fragment>
+      <Head>
+        <title>Add a New Meetup</title>
+        <meta
+          name="description"
+          content="Add your own meetups and create amazing networking opportunities"
+        />
+      </Head>
+
+       {/* send addMeetupHandler function to NewMeetupForm with props */}
+      <NewMeetupForm onAddMeetup={addMeetupHandler} />
+     
+    </Fragment>
+  );
 };
 
 export default NewMeetupPage;
