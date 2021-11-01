@@ -44,7 +44,7 @@ export async function getStaticPaths() {
   // Close database connection
   client.close();
   return {
-    fallback: false, // show 404 error page if no route found
+    fallback: 'blocking', // show 404 error page if no route found
     paths: meetups.map((meetup) => ({
       params: {
         meetupId: meetup._id.toString(),
