@@ -1,24 +1,6 @@
 // our-domain/
 import MeetupList from "../components/meetups/MeetupList";
-
-const DUMMY_MEETUPS = [
-  {
-    id: "m1",
-    title: "A First Meetup",
-    image:
-      "https://images.unsplash.com/photo-1635361230615-26d866ea9370?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80",
-    address: "Some address 5, 12345 Some City",
-    description: "This is a first meetup",
-  },
-  {
-    id: "m2",
-    title: "A Second Meetup",
-    image:
-      "https://images.unsplash.com/photo-1635397186950-96a4d88d6181?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80",
-    address: "Some address 32, 45 Some City",
-    description: "This is a second meetup",
-  },
-];
+import { MongoClient } from "mongodb";
 
 const HomePage = (props) => {
   return (
@@ -41,12 +23,37 @@ const HomePage = (props) => {
 //   };
 // }
 
+// Pre rendering the page with data that's receive form database
 export async function getStaticProps() {
-  // Fetch date from API
+  /*Get data from mongo database */
+
+  // Connect to mongodb cluster
+  const client = await MongoClient.connect(
+    "mongodb+srv://user:nP0WHombYLsf7ocx@cluster0.ynjjr.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+
+  // Call db method on the client object
+  const db = client.db();
+
+  // Access to collection
+  const meetupCollection = db.collection("meetups");
+
+  // get data form mondo database
+  const meetups = await meetupCollection.find().toArray();
+
+  // Close database connection
+  client.close();
+
   return {
     props: {
-      meetups: DUMMY_MEETUPS,
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
     },
+    // pre render page after request is come. every 1 second.
     revalidate: 1,
   };
 }
