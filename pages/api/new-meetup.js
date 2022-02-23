@@ -12,7 +12,7 @@ async function handler(req, res) {
     /* Store data in the database */
     // Connect to mongodb cluster
     const client = await MongoClient.connect(
-      "mongodb+srv://user:nP0WHombYLsf7ocx@cluster0.ynjjr.mongodb.net/meetups?retryWrites=true&w=majority"
+      "mongodb+srv://irakli:irakli83@cluster0.xvnnn.mongodb.net/meetups?retryWrites=true&w=majority"
     );
 
     // Call db method on the client object
